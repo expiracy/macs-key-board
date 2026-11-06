@@ -1,0 +1,3 @@
+import MacsKeyBoredKit
+
+MacsKeyBoredApp.run()

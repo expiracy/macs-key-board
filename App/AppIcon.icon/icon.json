@@ -1,0 +1,22 @@
+{
+  "fill-specializations" : [
+    { "value" : { "linear-gradient" : [ "extended-gray:1.00000,1.00000", "extended-gray:0.89000,1.00000" ] } },
+    { "appearance" : "dark", "value" : { "linear-gradient" : [ "extended-gray:0.25000,1.00000", "extended-gray:0.09000,1.00000" ] } }
+  ],
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "name" : "marks",
+          "image-name-specializations" : [
+            { "value" : "marks-light.png" },
+            { "appearance" : "dark", "value" : "marks-dark.png" }
+          ]
+        }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "translucency" : { "enabled" : false, "value" : 0.5 }
+    }
+  ],
+  "supported-platforms" : { "squares" : [ "macOS" ] }
+}
