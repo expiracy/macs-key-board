@@ -3,15 +3,23 @@ import SwiftUI
 
 /// MacsPane's bubble: a rounded panel with a small nub on top pointing at what it came from (the
 /// menu-bar icon, the System Settings list). The nub sits at `nubX` from the left edge, or in the
-/// middle when that is nil, and is kept clear of the rounded corners.
+/// middle when that is nil, and is kept clear of the rounded corners. With `pointsDown` the nub
+/// sits on the bottom edge instead, for a bubble that opens upward.
 struct SpeechBubbleShape: Shape {
     static let standardNub = CGSize(width: 22, height: 9)
 
     var nub = SpeechBubbleShape.standardNub
     var nubX: CGFloat?
     var corner: CGFloat = 14
+    var pointsDown = false
 
     func path(in rect: CGRect) -> Path {
+        let up = upwardPath(in: rect)
+        guard pointsDown else { return up }
+        return up.applying(CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: rect.minY + rect.maxY))
+    }
+
+    private func upwardPath(in rect: CGRect) -> Path {
         let body = CGRect(x: rect.minX, y: rect.minY + nub.height, width: rect.width, height: rect.height - nub.height)
         let panel = Path(roundedRect: body, cornerRadius: corner, style: .continuous)
         let clear = corner + nub.width / 2
