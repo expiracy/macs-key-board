@@ -118,20 +118,31 @@ struct StatusMenuView: View {
             if let id = model.openSubmenu, let anchor = anchors[id],
                let entry = model.content.groups.flatMap(\.actions).first(where: { $0.id == id }) {
                 let row = proxy[anchor]
+                let height = submenuHeight(entry)
+                // The dropdown's own window clips anything past its edges, so a row near the foot
+                // (New trigger) opens its choices upward instead, as a real menu does.
+                let opensUp = row.maxY - 6 + height > proxy.size.height && row.minY + 6 - height >= 0
                 ZStack(alignment: .topLeading) {
                     Color.clear
                         .contentShape(Rectangle())
                         .onTapGesture { withAnimation(.easeOut(duration: 0.12)) { model.openSubmenu = nil } }
-                    submenuBubble(entry)
-                        .offset(x: row.minX + 4, y: row.maxY - 6)
-                        .transition(.scale(scale: 0.85, anchor: .topLeading).combined(with: .opacity))
+                    submenuBubble(entry, opensUp: opensUp)
+                        .offset(x: row.minX + 4, y: opensUp ? row.minY + 6 - height : row.maxY - 6)
+                        .transition(.scale(scale: 0.85, anchor: opensUp ? .bottomLeading : .topLeading)
+                            .combined(with: .opacity))
                 }
             }
         }
     }
 
-    private func submenuBubble(_ entry: StatusMenuEntry) -> some View {
-        VStack(spacing: 0) {
+    /// The choices' rows, the bubble's padding and its nub.
+    private func submenuHeight(_ entry: StatusMenuEntry) -> CGFloat {
+        CGFloat(entry.submenu.count) * (Metric.row - 4) + 12 + SpeechBubbleShape.standardNub.height
+    }
+
+    private func submenuBubble(_ entry: StatusMenuEntry, opensUp: Bool) -> some View {
+        let shape = SpeechBubbleShape(nubX: Metric.submenuNubX, corner: Metric.corner, pointsDown: opensUp)
+        return VStack(spacing: 0) {
             ForEach(Array(entry.submenu.enumerated()), id: \.element.id) { index, item in
                 Button { model.run(item) } label: {
                     HStack(spacing: 10) {
@@ -154,12 +165,10 @@ struct StatusMenuView: View {
             }
         }
         .padding(6)
-        .padding(.top, SpeechBubbleShape.standardNub.height)
-        .frame(width: 260)
-        .background(SpeechBubbleShape(nubX: Metric.submenuNubX, corner: Metric.corner)
-            .fill(Color(nsColor: .windowBackgroundColor)))
-        .overlay(SpeechBubbleShape(nubX: Metric.submenuNubX, corner: Metric.corner)
-            .stroke(Color.primary.opacity(0.12), lineWidth: 1))
+        .padding(opensUp ? .bottom : .top, SpeechBubbleShape.standardNub.height)
+        .frame(width: 260, height: submenuHeight(entry))
+        .background(shape.fill(Color(nsColor: .windowBackgroundColor)))
+        .overlay(shape.stroke(Color.primary.opacity(0.12), lineWidth: 1))
         .compositingGroup()
         .shadow(color: .black.opacity(0.18), radius: 10, y: 4)
         .accessibilityElement(children: .contain)
