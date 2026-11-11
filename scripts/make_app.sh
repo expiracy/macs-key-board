@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Wrap a built macskeybored binary in MacsKeyBored.app: the bundle layout, its icon and its Info.plist.
+# Wrap a built macsbored binary in MacsBored.app: the bundle layout, its icon and its Info.plist.
 # Signing is left to the caller (run.sh signs for development).
-#   scripts/make_app.sh <binary> <MacsKeyBored.app> <version> <build>
+#   scripts/make_app.sh <binary> <MacsBored.app> <version> <build>
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN="$1"
@@ -11,17 +11,17 @@ BUILD="$4"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$BIN" "$APP/Contents/MacOS/MacsKeyBored"
+cp "$BIN" "$APP/Contents/MacOS/MacsBored"
 [[ -f "$ROOT/App/AppIcon.icns" ]] && cp "$ROOT/App/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
-  <key>CFBundleExecutable</key><string>MacsKeyBored</string>
-  <key>CFBundleIdentifier</key><string>com.jgray.macskeybored</string>
-  <key>CFBundleName</key><string>MacsKeyBored</string>
-  <key>CFBundleDisplayName</key><string>MacsKeyBored</string>
+  <key>CFBundleExecutable</key><string>MacsBored</string>
+  <key>CFBundleIdentifier</key><string>com.jgray.macsbored</string>
+  <key>CFBundleName</key><string>MacsBored</string>
+  <key>CFBundleDisplayName</key><string>MacsBored</string>
   <key>CFBundleIconFile</key><string>AppIcon</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>

@@ -1,0 +1,3 @@
+import MacsBoredKit
+
+MacsBoredApp.run()

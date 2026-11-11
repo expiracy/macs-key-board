@@ -1,7 +1,7 @@
-# XcodeGen manifest for the signed MacsKeyBored.app. Regenerate the (git-ignored) .xcodeproj with:
+# XcodeGen manifest for the signed MacsBored.app. Regenerate the (git-ignored) .xcodeproj with:
 #   xcodegen generate
-# The app reuses the package's MacsKeyBoredKit library, so `swift run macskeybored` and the .app share every line.
-name: MacsKeyBored
+# The app reuses the package's MacsBoredKit library, so `swift run macsbored` and the .app share every line.
+name: MacsBored
 options:
   bundleIdPrefix: com.jgray
   deploymentTarget:
@@ -9,11 +9,11 @@ options:
   createIntermediateGroups: true
 
 packages:
-  MacsKeyBored:
+  MacsBored:
     path: .
 
 targets:
-  MacsKeyBored:
+  MacsBored:
     type: application
     platform: macOS
     sources:
@@ -24,27 +24,27 @@ targets:
         type: file
         buildPhase: resources
     dependencies:
-      - package: MacsKeyBored
-        product: MacsKeyBoredKit
+      - package: MacsBored
+        product: MacsBoredKit
     settings:
       base:
-        PRODUCT_NAME: MacsKeyBored
-        PRODUCT_BUNDLE_IDENTIFIER: com.jgray.macskeybored
+        PRODUCT_NAME: MacsBored
+        PRODUCT_BUNDLE_IDENTIFIER: com.jgray.macsbored
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "5.0"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_LSUIElement: YES            # menu-bar only, no Dock icon
-        INFOPLIST_KEY_CFBundleDisplayName: "MacsKeyBored"
+        INFOPLIST_KEY_CFBundleDisplayName: "MacsBored"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGN_STYLE: Manual
         CODE_SIGN_IDENTITY: "-"
         DEVELOPMENT_TEAM: ""
 
 schemes:
-  MacsKeyBored:
+  MacsBored:
     build:
       targets:
-        MacsKeyBored: all
+        MacsBored: all
     run:
       config: Debug
