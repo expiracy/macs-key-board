@@ -197,7 +197,9 @@ final class MacsBoredModel: ObservableObject {
     }
 
     func requestAccess() {
-        Accessibility.request()
+        Accessibility.request { [weak self] in
+            MainActor.assumeIsolated { self?.startTapIfAllowed() }
+        }
     }
 
     func completeSetup() {

@@ -51,13 +51,11 @@ enum LoginItem {
 enum Accessibility {
     static var isTrusted: Bool { AXIsProcessTrusted() }
 
-    /// Asks macOS to show its prompt, and opens the Accessibility list for the switch.
-    static func request() {
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(options)
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-            NSWorkspace.shared.open(url)
-        }
+    /// As MacsPane asks: macOS's own prompt, the Accessibility list in System Settings, and a
+    /// dropdown under that window holding the app's icon to drag into the list. `onGranted` runs once
+    /// the switch is on.
+    static func request(onGranted: (() -> Void)? = nil) {
+        PermissionGrantPresenter.shared.requestAccessibility(onGranted: onGranted)
     }
 }
 #endif
