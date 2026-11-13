@@ -1,8 +1,8 @@
-# MacsKeyBored
+# MacsBored
 
 Your Mac's shortcuts, sent to the computer you're remoting into.
 
-MacsKeyBored is a menu-bar app for macOS, a sibling of [MacsPane](https://github.com/expiracy/macs-pane).
+MacsBored is a menu-bar app for macOS, a sibling of [MacsPane](https://github.com/expiracy/macs-pane).
 When Windows App, Citrix Viewer or a virtual machine is in front, macOS stops taking ⌘⇥, ⌘Space, ⌃←/→,
 the screenshot keys and the rest, so they reach the session as they would on a PC. Switch to any other
 app and macOS has them back. Alongside that it runs your own shortcuts, BetterTouchTool style.
@@ -11,59 +11,93 @@ app and macOS has them back. Alongside that it runs your own shortcuts, BetterTo
 
 Requires macOS 14 or later, on Apple silicon or Intel.
 
-1. Open the `MacsKeyBored-<version>.dmg` made by `scripts/release.sh` and drag MacsKeyBored into
+1. Open the `MacsBored-<version>.dmg` made by `scripts/release.sh` and drag MacsBored into
    Applications.
-2. Open MacsKeyBored from Applications. It has no Dock icon: it lives in the menu bar, and setup opens
+2. Open MacsBored from Applications. It has no Dock icon: it lives in the menu bar, and setup opens
    the first time.
-3. In setup, click **Grant Access** and switch MacsKeyBored on in System Settings › Privacy & Security ›
+3. In setup, click **Grant Access** and switch MacsBored on in System Settings › Privacy & Security ›
    Accessibility. It needs this to see keys before macOS acts on them and to read whether a window is
    full screen.
 
 Test builds are not signed by Apple, so macOS blocks the first open: click **Done**, then open System
-Settings › Privacy & Security and click **Open Anyway** under the message about MacsKeyBored. You do
+Settings › Privacy & Security and click **Open Anyway** under the message about MacsBored. You do
 this once. Later test builds keep the Accessibility permission. The disk image has these steps in
-*How to open MacsKeyBored.txt*.
+*How to open MacsBored.txt*.
 
-To remove MacsKeyBored, quit it from its menu (which gives macOS back all its shortcuts), then delete it
-from Applications and `~/Library/Application Support/MacsKeyBored`.
+To remove MacsBored, quit it from its menu (which gives macOS back all its shortcuts), then delete it
+from Applications and `~/Library/Application Support/MacsBored`.
 
 ## Using it
 
 - **Passthrough apps.** Each names the apps it covers, when it acts, and which of macOS's shortcuts go
   to the app instead: the app switcher, Spotlight, Mission Control, Spaces, screenshots, input sources,
-  the Dock and Notification Centre, keyboard navigation, Zoom and Help search. The menu's *Add an app*
-  offers the app in front and any remote-desktop app installed; setup offers them on first run.
+  the Dock and Notification Centre, keyboard navigation, Zoom and Help search. The menu's *Now* box
+  offers to add the app in front; setup offers any remote-desktop app installed on first run.
 - **Conditions.** A passthrough or trigger can wait for any of these: the window is full screen, the
   window fills the screen, the window title contains some text, an external display is connected, the
   Mac is on battery, the time is between two times, or Caps Lock is on. Each can be turned round
-  (*Unless*), and they combine as *All of these* or *Any of these*. The menu's *Now* card says which one
-  is holding a passthrough back.
+  (*Unless*), and they combine as *All* or *Any*.
 - **Pause.** ⌃⌥⌘P inside a passthrough app gives macOS its shortcuts back so you can ⌘⇥ out. It resumes
   by itself once another app is in front.
 - **Keys.** *Send every key straight to the app* also keeps other apps' global shortcuts (Raycast,
   Alfred, window managers) out of the session; it is off until you switch it on. *Modifier keys* can
   swap ⌘ and ⌃, so ⌘C is Ctrl+C in Windows and ⌃ is the Windows key.
-- **Triggers.** Keys that do something, anywhere or only in some apps, under the same conditions: send
-  other keys (a remap), open an app, open a link or file, run a shell command, type text, pause
-  passthrough, or switch Keep awake. A trigger with no apps works everywhere except inside a passthrough
-  app, whose keys belong to the session; name the passthrough app to have it work there too. Giving a
-  trigger keys another trigger had takes them from it.
+- **Triggers.** Keys that do one thing, anywhere or only in some apps, under the same conditions: press
+  other keys instead (a remap), open an app, a link or a file, run one of Apple's Shortcuts, or pass just
+  those keys straight to the app in front. A trigger with no apps works everywhere except inside a
+  passthrough app, whose keys belong to the session; name the passthrough app to have it work there too.
+  Giving a trigger keys another trigger had takes them from it.
 - **Caps Lock is Hyper.** Caps Lock holds ⌃⌥⇧⌘, a combination no app uses, for your triggers. It is
   remapped with `hidutil` for this login session and put back when you switch it off or quit; if another
   tool already remaps keys, it stays off.
-- **Keep awake.** Holds off display sleep until you switch it off.
 
-There is no separate Settings window: it is all in the menu, with a pencil on each row to open its
-editor. The menu's Setup button opens setup again.
+There is no separate Settings window: it is all in the menu. *New* opens the editor, whose tabs pick
+what you're making (Remap Keys, Open, Run Shortcut, Passthrough), and the pencil on a row opens it on
+that entry. The menu's Setup button opens setup again.
+
+## The settings file
+
+Everything lives in `~/Library/Application Support/MacsBored/config.json`, written to be edited by hand,
+by scripts or by an AI agent. MacsBored watches it: a valid change applies as soon as it's saved. A file
+with a mistake is left alone, the last good settings keep running, and the menu names the line.
+
+```json
+{
+  "enabled": true,
+  "pauseKeys": "ctrl+opt+cmd+P",
+  "passthrough": [{ "name": "Windows App", "apps": ["com.microsoft.rdc.macos"] }],
+  "triggers": [
+    { "name": "Open Notes", "keys": "ctrl+opt+N", "action": { "openApp": "com.apple.Notes" } },
+    { "name": "Focus", "keys": "hyper+F", "action": { "runShortcut": "Start a Focus timer" },
+      "when": [{ "unless": "onBattery" }] }
+  ]
+}
+```
+
+Keys are text (`ctrl+opt+cmd+P`, `hyper+N`, `cmd+space`; the menu's `⌃⌥⌘P` works too), and a trigger
+can have several as a list (`"keys": ["cmd+space", "cmd+tab"]`), any of which sets it off. Apps are bundle
+IDs, times are `"09:00"`, and entries need no IDs. An action is one of `sendKeys`, `openApp`,
+`runShortcut`, `passThrough` (`true`) or `open`. `config.schema.json` beside the file describes every
+field. Fields MacsBored doesn't know are kept as they are. The first version's file
+(`~/Library/Application Support/MacsKeyBored/config.json`) is converted once.
+
+From a terminal, the app's executable answers three commands without starting the app:
+
+```bash
+/Applications/MacsBored.app/Contents/MacOS/MacsBored check
+```
+
+`check [file]` prints each problem with its line and exits 1 on an error; `path` prints where the file
+is; `schema` prints the schema.
 
 ## How passthrough works
 
 macOS's own shortcuts are "symbolic hot keys" that the WindowServer handles before any app sees the
-keys. While a passthrough app is in front, MacsKeyBored switches the chosen ones off with the private
+keys. While a passthrough app is in front, MacsBored switches the chosen ones off with the private
 SkyLight call AltTab also uses (`CGSSetSymbolicHotKeyEnabled`), and switches them back on when it isn't.
 
 It only ever switches back on what it switched off, and never touches a shortcut that is off in System
-Settings. On macOS 26 the WindowServer reports every hot key as off, so MacsKeyBored reads System
+Settings. On macOS 26 the WindowServer reports every hot key as off, so MacsBored reads System
 Settings' record (`com.apple.symbolichotkeys`) instead. The list of what it switched off is written to
 disk before each change, so a crash or a force quit is undone on the next launch, and quitting (⌘Q,
 `kill`, Ctrl-C) puts everything back.
@@ -79,34 +113,34 @@ Requires macOS 14 or later. The package builds with the Command Line Tools; the 
 ```sh
 swift build              # build everything
 swift test               # run the Core tests
-scripts/run.sh           # build a MacsKeyBored.app bundle and open it
+scripts/run.sh           # build a MacsBored.app bundle and open it
 scripts/make_icon.sh     # redraw App/AppIcon.icns and App/AppIcon.icon from the code
 ```
 
-`swift run macskeybored` also works, but Accessibility is granted per signed app. `scripts/run.sh`
+`swift run macsbored` also works, but Accessibility is granted per signed app. `scripts/run.sh`
 signs with a requirement on the bundle identifier alone, so one grant lasts across rebuilds (or set
-`MACSKEYBORED_SIGN_IDENTITY=…` to use your own identity).
+`MACSBORED_SIGN_IDENTITY=…` to use your own identity).
 
-For the Xcode project: `xcodegen generate`, then build the `MacsKeyBored` scheme.
+For the Xcode project: `xcodegen generate`, then build the `MacsBored` scheme.
 
 ### Releasing
 
 `scripts/release.sh beta.1` runs the tests, builds for Apple silicon and Intel, signs the app and packs
-it in `dist/MacsKeyBored-<version>-beta.1.dmg` with its SHA-256. The version is in `VERSION`; the build
+it in `dist/MacsBored-<version>-beta.1.dmg` with its SHA-256. The version is in `VERSION`; the build
 number is the commit count, so every release is newer than the last.
 
 To give it to other people, sign it with a Developer ID (from the Apple Developer Program) and have
 Apple notarize it:
 
 ```sh
-xcrun notarytool store-credentials macskeybored --apple-id <email> --team-id <TEAMID>   # once
-MACSKEYBORED_SIGN_IDENTITY="Developer ID Application: <Name> (<TEAMID>)" \
-MACSKEYBORED_NOTARY_PROFILE=macskeybored scripts/release.sh
+xcrun notarytool store-credentials macsbored --apple-id <email> --team-id <TEAMID>   # once
+MACSBORED_SIGN_IDENTITY="Developer ID Application: <Name> (<TEAMID>)" \
+MACSBORED_NOTARY_PROFILE=macsbored scripts/release.sh
 ```
 
 Every release signed with the same Developer ID keeps the Accessibility permission people already
-gave. Without an identity the script makes an ad-hoc test build, with *How to open MacsKeyBored.txt* in
-the disk image. Its signature asks only for MacsKeyBored's bundle identifier, so testers keep
+gave. Without an identity the script makes an ad-hoc test build, with *How to open MacsBored.txt* in
+the disk image. Its signature asks only for MacsBored's bundle identifier, so testers keep
 Accessibility across test builds; any other ad-hoc app claiming that identifier would get it too, so use
 a Developer ID before a wide release.
 
@@ -114,22 +148,18 @@ a Developer ID before a wide release.
 
 | Target | What it holds |
 |---|---|
-| `MacsKeyBoredCore` | Pure logic with no AppKit: profiles, conditions, triggers, the passthrough plan, the key router, the hot-key ledger and the config file. Unit-tested. |
-| `MacsKeyBoredKit` | The app: the keyboard event tap (on its own thread), the system-shortcut switch, the Accessibility reads, the menu-bar dropdown, the editors and setup. |
-| `macskeybored` | The executable that boots `MacsKeyBoredKit`. |
+| `MacsBoredCore` | Pure logic with no AppKit: profiles, conditions, triggers, the passthrough plan, the key router, the hot-key ledger, the settings file and its schema, and the editor's draft. Unit-tested. |
+| `MacsBoredKit` | The app: the keyboard event tap (on its own thread), the system-shortcut switch, the Accessibility reads, the menu-bar dropdown, the editors and setup. |
+| `macsbored` | The executable that boots `MacsBoredKit`. |
 
-Your choices are saved to `~/Library/Application Support/MacsKeyBored/config.json`. Every field decodes
-with a default, and one entry this version doesn't understand costs only itself, so a file from another
-version never resets your passthrough apps or triggers.
-
-`macskeybored --open-menu` and `--open-editor profile|trigger` open those surfaces straight away, for
-looking at them without clicking through.
+`macsbored --open-menu`, `--open-editor remap|open|shortcut|passthrough` and `--open-setup` open those
+surfaces straight away, for looking at them without clicking through.
 
 ## License
 
 Copyright (C) 2026 James Gray
 
-MacsKeyBored is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
+MacsBored is free software: you can redistribute it and/or modify it under the terms of the GNU Affero
 General Public License as published by the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version. Anything built from it, including a modified version you only offer
 to others over a network, must be released under the same license with its source. See
